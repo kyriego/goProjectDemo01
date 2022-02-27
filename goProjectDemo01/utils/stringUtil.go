@@ -9,3 +9,7 @@ func PrintString(str string) {
 func GetStrLen(str string) int {
 	return len(str)
 }
+
+func ShowString(str string) {
+	fmt.Println(str)
+}
