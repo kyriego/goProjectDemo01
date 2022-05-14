@@ -1,0 +1,37 @@
+十二.Netty之protobuf进行数据编码/解码以进行传输【收集：protobuf，json】
+	总的使用【看.proto图说话】： （客户端：创建一个protobuf数据结构，通过builder对这个数据结构进行初始化，然后toByteArray()或者WriteTo进行传输）
+					      （服务端：读取这个byte[],然后parseFrom（byte[]）还原为这个数据结构，最后对其进行读取，注意貌似不能对读到的数据进行修改）
+
+
+	protobuf的操作：
+	1)【安装】：安装一个protoc编译器，可以直接下载exe的可执行文件，安装到PC后将bin的路径注册到Path系统变量中，这样可以直接在PC终端通过protoc命令来对Student.proto文件进行编译
+	2)【protoc】:在项目文件中创建一个虚空POJO文件夹,然后在IDE项目路径下创建proto文件和编译     ;   指定package 为这个设想中的文件夹
+			当需要修改的时候，直接对proto再次进行修改，再次编译即可，可以新增变量，进行删除变量是要对所删除的变量名/变量遍号设置为reserverd
+
+
+	3)【Import导入】：
+		场景：有多个.proto文件，不同的.proto文件中定义了不同的message，要在某一个.proto中用另一个.proto的message
+		操作： 每个.proto都有文件名，以及一个package  👉在.proto中import "filename"来完成导入/导入完成后通过package.message即包名来引用。
+
+	
+	4).proto文件中的语法（如何写一个OOP中的类？）
+		①普通的Person类
+		②在普通的Person类中声明一个enum类型(思考方式：整体标签类型名Weekend，每一个标签名Friday，每一个标签值 0 , 1 , 2 ,3)
+		enum Weenkend(
+			XXXday = 0;
+			XXXday = 1;
+		)
+
+		②List，数组元素有可能是基本类型，也有可能是另外一个message;   【例子：repeat Person p = N  /  repeat int32 num = N;】
+		③Map:   map<string,string> mapname = N;                                                 
+		④Bytes类型封装消息（声明一个bytes类型用来封装消息体，既可以往里面装java原生转bytes[]消息，也可以传进一个protobuf对象进去。。。。到了客户端后需要重新从[]bytes反序列化/toString()）： bytes msg = N	【练习：定义一个Teacher类，和一个Soldier类，和一个信息类，将一排信息发送至服务器，然后服务器进行解析，对这一排信息进行读取处理】
+		⑤JSON:
+	4).如何使用通过protobuf创建出来的对象以及序列化反序列化?
+		toByteArray()  /  writeTo(fileOutputStream) / Student.ParseFrom(fileInputStream)
+
+	
+	
+	①简单应用：
+		需求：客户端发送一个Person对象至服务器，服务器接收到数据后进行解码，复原为一个Person对象
+		实现：netty项目中编写Person_POJO类并通过protobuf进行处理 + 客户端创建一个PesonPOJO/服务器接收PersonPOJO +  客户端和服务端注册protobufEncoder()/protobufDecoder()
+	②高阶应用：通过protobuf中的oneof来实现向服务器一次发送多种不同的数据，但服务器可以统一处理？
